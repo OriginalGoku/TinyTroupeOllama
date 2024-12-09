@@ -65,7 +65,7 @@ Settings.embed_model = llmaindex_openai_embed_model
 ###############################################################################
 
 
-from tinytroupe import openai_utils
+from tinytroupe.clients import client
 from tinytroupe.utils import name_or_empty, break_text_at_length, repeat_on_error
 
 
@@ -787,9 +787,12 @@ class TinyPerson(JsonSerializableRegistry):
         logger.debug(f"[{self.name}] Sending messages to OpenAI API")
         logger.debug(f"[{self.name}] Last interaction: {messages[-1]}")
 
-        next_message = openai_utils.client().send_message(messages, response_format=CognitiveActionModel)
+
+        next_message = client().send_message(messages)
+
 
         logger.debug(f"[{self.name}] Received message: {next_message}")
+        
 
         return next_message["role"], utils.extract_json(next_message["content"])
 
@@ -1019,7 +1022,7 @@ class TinyPerson(JsonSerializableRegistry):
 
         if self._extended_agent_summary is None and extended:
             logger.debug(f"Generating extended agent summary for {self.name}.")
-            self._extended_agent_summary = openai_utils.LLMRequest(
+            self._extended_agent_summary = self.client().LLMRequest( #openai_utils.LLMRequest(
                                                 system_prompt="""
                                                 You are given a short biography of an agent, as well as a detailed specification of his or her other characteristics
                                                 You must then produce a short paragraph (3 or 4 sentences) that **complements** the short biography, adding details about
